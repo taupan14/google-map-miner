@@ -1,0 +1,37 @@
+version: '3.9'
+
+services:
+  backend:
+    build: ./backend
+    container_name: map-miner-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  worker:
+    build: ./worker
+    container_name: map-miner-worker
+    env_file:
+      - ./worker/.env
+    volumes:
+      - ./worker:/app/worker
+    command: python -m worker.main
+    restart: unless-stopped
+    # Worker is isolated — if it crashes, backend stays alive
+    depends_on:
+      - backend
+    shm_size: '1gb'    # Playwright needs shared memory
+
+networks:
+  default:
+    name: map-miner-network

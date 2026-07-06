@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.local
+__pycache__/
+*.pyc
+.venv/
+venv/
+dist/
+.next/
+*.egg-info/
+.DS_Store
+playwright-report/
+test-results/
